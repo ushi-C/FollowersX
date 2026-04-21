@@ -68,7 +68,7 @@ LANG_LABELS = {
         "tab_mtd": "📅 月度增长热度",
         "tab_abs": "📊 7日增长数",
         "growth_7d_abs_col": "7日涨粉估测",
-        "no_trend_data": "暂无可计算趋势的成员数据（至少需2条记录）",
+        "no_trend_data": "暂无可计算趋势的数据（至少需2条记录）",
         "stagnant_list": "停更成员",
         "insuf_list": "数据不足成员",
         "forecast_label": "预计",
@@ -107,7 +107,7 @@ LANG_LABELS = {
         "last_val": "Latest Followers",
         "trend_stagnant": "Stale 30d+",
         "trend_insufficient": "Insufficient data",
-        "user_trend_title": "📈 Member Growth Trend Ranking",
+        "user_trend_title": "📈 Trend Ranking",
         "trend_scope_all": "🌐 All Members",
         "trend_scope_label": "Scope",
         "rank_col": "RANK",
@@ -116,8 +116,8 @@ LANG_LABELS = {
         "trend_mtd_col": "Projected MTD Rate",
         "daily_avg_col": "Daily Avg Growth",
         "last_followers_col": "Latest Followers",
-        "tab_7d": "📊 7D Growth Estimate",
-        "tab_mtd": "📅 MTD Growth Estimate",
+        "tab_7d": "📊 7D Growth Rate Estimate",
+        "tab_mtd": "📅 MTD Growth Rate Estimate",
         "tab_abs": "📊 7D Growth Forecast",
         "growth_7d_abs_col": "7D Growth Rate Estimate",
         "no_trend_data": "No members with enough data to compute trends (need ≥ 2 records each).",
@@ -145,13 +145,13 @@ LANG_LABELS = {
         "efficiency": "⚖️ メンバー影響力|平均",
         "top50": "🎯 トップ 50",
         "institution": "事務所",
-        "total_influence": "総影響力",
+        "total_influence": "影響力",
         "avg_account": "平均値",
         "accounts": "所属メンバー",
         "account_id": "Ｘアカウント",
         "office_col": "事務所",
         "followers_col": "フォロワー",
-        "no_db": "データベースにデータがありません。",
+        "no_db": "データがありません。",
         "last_update": "最終更新",
         "7d_trend": "7日増加",
         "mtd_label": "本月増加予測",
@@ -159,18 +159,18 @@ LANG_LABELS = {
         "last_val": "最新フォロワー",
         "trend_stagnant": "30日以上更新なし",
         "trend_insufficient": "データ不足",
-        "user_trend_title": "📈 メンバー成長トレンド",
+        "user_trend_title": "📈 トレンド",
         "trend_scope_all": "🌐 総合",
         "trend_scope_label": "スコープ",
         "rank_col": "順位",
         "username_col": "メンバー",
-        "trend_7d_col": "7日伸び率",
-        "trend_mtd_col": "月間伸び率予測",
+        "trend_7d_col": "7日伸び率|予測",
+        "trend_mtd_col": "月間伸び率|予測",
         "daily_avg_col": "日均増加",
         "last_followers_col": "最新フォロワー",
-        "tab_7d": "📊 7日増加予測",
-        "tab_mtd": "📅 月間増加予測",
-        "tab_abs": "📊 7日增加数推定",
+        "tab_7d": "📊 7日伸び率",
+        "tab_mtd": "📅 月間伸び率",
+        "tab_abs": "📊 7日增加推定",
         "growth_7d_abs_col": "7日増加推定",
         "no_trend_data": "トレンド計算に必要なデータが不足しています（各メンバー最低2件必要）",
         "stagnant_list": "更新停止メンバー",
@@ -1233,7 +1233,7 @@ st.markdown(
 )
 
 # =========================
-# 13. KPI
+# 13. title KPI
 # =========================
 m1, m2, m3 = st.columns(3)
 m1.metric(L["monitored"], f"{len(filtered_df):,}", L["active_nodes"])
@@ -1272,7 +1272,7 @@ office_rank = (
 
 avg_rank = (
     office_rank.sort_values("AvgFollowers", ascending=False)
-    .head(10)
+    .head(20)
     .reset_index(drop=True)
 )
 label_colors = safe_rainbow_colors(len(avg_rank))
@@ -1404,7 +1404,7 @@ with col2:
 st.divider()
 
 # =========================
-# 17. Member Growth Trend Ranking — Bubble Cards
+# 17. Growth Trend Ranking — Bubble Cards
 # =========================
 st.markdown(
     f'<h3>📈 <span class="gold-text-gradient">{L["user_trend_title"].split(" ", 1)[1]}</span></h3>',
