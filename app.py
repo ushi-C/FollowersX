@@ -1086,7 +1086,7 @@ def render_bubble_table(
             if val_str is None or (isinstance(val_str, float) and val_str != val_str):
                 val_str = "—"
             # absstr always positive-styled (forecast value)
-             if col_name == "absstr":
+            if col_name == "absstr":
                 val_s = str(val_str)
                 if val_s == "—":
                     badges_html += _badge_html("—", "neutral")
