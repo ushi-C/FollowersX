@@ -1460,12 +1460,8 @@ else:
                 return "—"
             v = int(round(v))
             arrow = "🔺" if v >= 0 else "🔻"
-            # Render forecast label as a green inline badge before the arrow.
-            lbl_badge = (
-                f'<span class="bubble-badge badge-positive" '
-                f'style="margin-right:3px;">{forecast_lbl}</span>'
-            )
-            return f"{lbl_badge}{arrow} {abs(v):,}"
+            # Everything inside one green badge: label + arrow + number.
+            return f'<span class="bubble-badge badge-positive">{forecast_lbl} {arrow} {abs(v):,}</span>'
 
         # Three side-by-side columns: 7D / MTD / ABS.
         col7d, colmtd, colabs = st.columns(3)
