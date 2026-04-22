@@ -1085,7 +1085,8 @@ def render_bubble_table(
             val_str = row[col_name] if col_name in merged.columns else "—"
             if val_str is None or (isinstance(val_str, float) and val_str != val_str):
                 val_str = "—"
-            # absstr always positive-styled (forecast value)
+            # absstr contains raw HTML (forecast label bubble + arrow + number);
+            # output it directly without escaping or wrapping in another badge.
             if col_name == "absstr":
                 val_s = str(val_str)
                 if val_s == "—":
@@ -1459,8 +1460,12 @@ else:
                 return "—"
             v = int(round(v))
             arrow = "🔺" if v >= 0 else "🔻"
-            # Keep badge narrow: arrow + number only; label is in header.
-            return f"{arrow} {abs(v):,}"
+            # Render forecast label as a green inline badge before the arrow.
+            lbl_badge = (
+                f'<span class="bubble-badge badge-positive" '
+                f'style="margin-right:3px;">{forecast_lbl}</span>'
+            )
+            return f"{lbl_badge}{arrow} {abs(v):,}"
 
         # Three side-by-side columns: 7D / MTD / ABS.
         col7d, colmtd, colabs = st.columns(3)
