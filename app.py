@@ -1086,11 +1086,15 @@ def render_bubble_table(
             if val_str is None or (isinstance(val_str, float) and val_str != val_str):
                 val_str = "—"
             # absstr always positive-styled (forecast value)
-            if col_name == "absstr":
-                btype = "positive" if str(val_str) != "—" else "neutral"
+             if col_name == "absstr":
+                val_s = str(val_str)
+                if val_s == "—":
+                    badges_html += _badge_html("—", "neutral")
+                else:
+                    badges_html += val_s
             else:
                 btype = _classify_badge(str(val_str))
-            badges_html += _badge_html(str(val_str).replace("<", "&lt;"), btype)
+                badges_html += _badge_html(str(val_str).replace("<", "&lt;"), btype)
 
         rank_labels = {1: "🥇", 2: "🥈", 3: "🥉"}
         rank_display = rank_labels.get(rank, "")
@@ -1448,7 +1452,7 @@ else:
             lambda r: _daily_display(r, "daily_avg_mtd"), axis=1
         )
 
-        # 7D absolute growth as "🔺 N" (short format to keep badges compact).
+        # 7D absolute growth as "[预计] 🔺 N" — forecast label bubble + arrow + number.
         def _abs_fmt(row, forecast_lbl):
             v = row["growth_7d_abs"]
             if v is None or (isinstance(v, float) and v != v):
