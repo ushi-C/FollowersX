@@ -1053,6 +1053,7 @@ def render_bubble_table(
     L: dict = None,
     card_height_px: int = 58,
     fixed_iframe_height: int = None,
+    **kwargs,
 ):
     if L is None:
         L = {}
