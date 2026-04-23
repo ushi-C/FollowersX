@@ -1205,7 +1205,8 @@ def render_bubble_table(
     """
 
     full_html = BUBBLE_CSS + scrollbar_css + inner_div
-    components.html(full_html, height=iframe_h, scrolling=False)
+    final_h = fixed_iframe_height if fixed_iframe_height else iframe_h
+    components.html(full_html, height=final_h, scrolling=False)
 
 
 
