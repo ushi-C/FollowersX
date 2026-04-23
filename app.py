@@ -1014,17 +1014,8 @@ def render_bubble_table(
     max_rows: int = 50,
     L: dict = None,
     card_height_px: int = 58,
-    fixed_iframe_height: int = None,  # Deprecated: kept for backward compat, ignored
+    unified_n_cards: int = None,  # ✅ NEW
 ):
-    """
-    Render a Bubble Table via components.html() so HTML is never sanitized by Streamlit.
-
-    iframe height is now computed dynamically:
-      - Shows all cards without scroll when count is small (≤ MAX_SHOW)
-      - Caps at MAX_SHOW cards' worth of height and enables scroll when count is large
-      - A minimum floor (MIN_IFRAME_H) and maximum ceiling (MAX_IFRAME_H) are enforced
-        so the column never collapses to nothing or grows excessively long.
-    """
     if L is None:
         L = {}
     if extra_badges is None:
@@ -1048,18 +1039,19 @@ def render_bubble_table(
 
         rank_class = f"rank-{rank}" if rank <= 3 else ""
 
+
         # Avatar
         if avatar_url and str(avatar_url).startswith("http"):
             av = str(avatar_url).strip()
             avatar_html = (
-                f'<img class="bubble-avatar" src="{av}" alt="" loading="lazy" '
-                f"onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex';\">"
+                f'<img class="bubble-avatar" src="{av}" loading="lazy" '
+                f'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">'
                 f'<div class="bubble-avatar-placeholder" style="display:none;">◉</div>'
             )
         else:
             avatar_html = '<div class="bubble-avatar-placeholder">◉</div>'
 
-        # Name row: jp_name + YT icon
+        # Name
         name_raw = (
             str(jp_name)
             if jp_name and str(jp_name).strip() and str(jp_name) != "nan"
@@ -1067,41 +1059,30 @@ def render_bubble_table(
         )
         name_display = name_raw.replace("<", "&lt;").replace(">", "&gt;")
 
-        # YouTube icon only (SVG)
-        if youtube_url and str(youtube_url).strip().startswith("http"):
-            yt_url = str(youtube_url).strip()
-            yt_html = (
-                f'<a class="bubble-yt-icon" href="{yt_url}" target="_blank" rel="noopener" title="YouTube">'
-                f'<svg viewBox="0 0 24 24" width="13" height="13" fill="#cc0000" xmlns="http://www.w3.org/2000/svg">'
-                f'<path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8z"/>'
-                f'<polygon points="9.75,15.02 15.5,12 9.75,8.98" fill="white"/>'
-                f"</svg>"
-                f"</a>"
-            )
+        # YouTube
+        if youtube_url and str(youtube_url).startswith("http"):
+            yt_html = f'<a class="bubble-yt-icon" href="{youtube_url}" target="_blank">▶</a>'
         else:
             yt_html = ""
 
         uname_display = username if username.startswith("@") else f"@{username}"
         office_display = str(office).replace("<", "&lt;") if office else ""
+
         fol_str = fmt_followers(int(followers)) if followers is not None else "—"
+
 
         # Extra badges
         badges_html = ""
-        for col_name, _label in extra_badges:
-            val_str = row[col_name] if col_name in merged.columns else "—"
-            if val_str is None or (isinstance(val_str, float) and val_str != val_str):
+        for col_name, _ in extra_badges:
+            val_str = row.get(col_name, "—")
+            if val_str is None:
                 val_str = "—"
-            # absstr contains raw HTML (forecast label bubble + arrow + number);
-            # output it directly without escaping or wrapping in another badge.
+
             if col_name == "absstr":
-                val_s = str(val_str)
-                if val_s == "—":
-                    badges_html += _badge_html("—", "neutral")
-                else:
-                    badges_html += val_s
+                badges_html += str(val_str)
             else:
                 btype = _classify_badge(str(val_str))
-                badges_html += _badge_html(str(val_str).replace("<", "&lt;"), btype)
+                badges_html += _badge_html(str(val_str), btype)
 
         rank_labels = {1: "🥇", 2: "🥈", 3: "🥉"}
         rank_display = rank_labels.get(rank, "")
@@ -1120,17 +1101,17 @@ def render_bubble_table(
         cards_html.append(
             f"""
 <div class="bubble-card {rank_class}" style="animation-delay:{delay}">
-  <span class="bubble-rank">{rank_display}</span>
   <div class="bubble-avatar-col">{avatar_html}</div>
   <div class="bubble-identity-col">
-    <div class="bubble-name-row"><span class="bubble-jp-name">{name_display}</span>{yt_html}</div>
-    <div class="bubble-meta-row"><span class="bubble-username">{uname_display}</span>{office_sep}</div>
+    <div class="bubble-name-row">{name_display}{yt_html}</div>
+    <div class="bubble-meta-row">{uname_display} · {office_display}</div>
   </div>
   <div class="bubble-stats-col">
     <div class="bubble-followers">{fol_str}</div>
     <div class="bubble-metrics-row">{badges_html}</div>
   </div>
-</div>"""
+</div>
+"""
         )
 
     # ── Dynamic iframe height ───────────────────────────────────────────────
@@ -1146,29 +1127,26 @@ def render_bubble_table(
     PADDING = 16             # px — body top+bottom padding (8px each side)
     MAX_SHOW = 10            # cards visible before scrolling kicks in
     MIN_IFRAME_H = 80        # px — floor: never collapse to nothing
-    MAX_IFRAME_H = 700       # px — ceiling: prevent runaway tall columns
+    MAX_IFRAME_H = 7020       # px — ceiling: prevent runaway tall columns
 
     n_cards = min(len(cards_html), max_rows)
 
     # Natural height if every card fits without scrolling
-    natural_h = n_cards * CARD_H + max(n_cards - 1, 0) * GAP + PADDING
+    if unified_n_cards is not None:
+        n_cards = max(real_n, unified_n_cards)
+    else:
+        n_cards = real_n
 
-    # Scrollable cap height: show at most MAX_SHOW cards before inner div scrolls
+    natural_h = n_cards * CARD_H + max(n_cards - 1, 0) * GAP + PADDING
     max_h = MAX_SHOW * CARD_H + (MAX_SHOW - 1) * GAP + PADDING
 
-    # Inner div uses max-height + overflow so it scrolls when needed
-    # iframe itself matches the rendered height — no extra blank space
     inner_iframe_h = min(natural_h, max_h)
-    # Apply safety rails
     iframe_h = max(MIN_IFRAME_H, min(inner_iframe_h, MAX_IFRAME_H))
 
     scroll_style = (
         f"max-height:{max_h}px;"
         "overflow-y:auto;"
         "overflow-x:hidden;"
-        # Thin custom scrollbar (WebKit)
-        "scrollbar-width:thin;"
-        "scrollbar-color:rgba(212,175,55,0.45) transparent;"
     )
 
     inner_div = (
@@ -1177,23 +1155,9 @@ def render_bubble_table(
         + "</div>"
     )
 
-    # WebKit scrollbar fine-tuning (must live inside the iframe <style>)
-    scrollbar_css = """
-<style>
-.bubble-table-wrapper::-webkit-scrollbar        { width: 5px; }
-.bubble-table-wrapper::-webkit-scrollbar-track  { background: transparent; }
-.bubble-table-wrapper::-webkit-scrollbar-thumb  {
-    background: rgba(212,175,55,0.4);
-    border-radius: 999px;
-}
-.bubble-table-wrapper::-webkit-scrollbar-thumb:hover {
-    background: rgba(212,175,55,0.7);
-}
-</style>
-"""
-
-    full_html = BUBBLE_CSS + scrollbar_css + inner_div
+    full_html = BUBBLE_CSS + inner_div
     components.html(full_html, height=iframe_h, scrolling=False)
+
 
 
 # =========================
@@ -1467,27 +1431,43 @@ else:
             lambda r: _daily_display(r, "daily_avg_mtd"), axis=1
         )
 
-        # 7D absolute growth as "[预计] 🔺 N" — forecast label bubble + arrow + number.
         def _abs_fmt(row, forecast_lbl):
             v = row["growth_7d_abs"]
             if v is None or (isinstance(v, float) and v != v):
                 return "—"
             v = int(round(v))
             arrow = "🔺" if v >= 0 else "🔻"
-            # Everything inside one green badge: label + arrow + number.
             return f'<span class="bubble-badge badge-positive">{forecast_lbl} {arrow} {abs(v):,}</span>'
 
-        # Three side-by-side columns: 7D / MTD / ABS.
+        # ===== precompute rankings (for unified height) =====
+        rank7d = (
+            scope_trends[scope_trends["trend_7d"].notna()]
+            .sort_values("trend_7d", ascending=False)
+            .reset_index(drop=True)
+        )
+
+        rankmtd = (
+            scope_trends[scope_trends["trend_mtd"].notna()]
+            .sort_values("trend_mtd", ascending=False)
+            .reset_index(drop=True)
+        )
+
+        rankabs = (
+            scope_trends[scope_trends["growth_7d_abs"].notna()]
+            .sort_values("growth_7d_abs", ascending=False)
+            .reset_index(drop=True)
+        )
+
+        # ✅ unified height baseline
+        max_cards = max(len(rank7d), len(rankmtd), len(rankabs))
+
+        # ===== layout =====
         col7d, colmtd, colabs = st.columns(3)
 
-        # 7D column.
+        # 7D column
         with col7d:
             st.markdown(f"**{L['tab_7d']}**")
-            rank7d = (
-                scope_trends[scope_trends["trend_7d"].notna()]
-                .sort_values("trend_7d", ascending=False)
-                .reset_index(drop=True)
-            )
+
             stag7d = scope_trends[scope_trends["status"] == "stagnant"]
             insuf7d = scope_trends[
                 (scope_trends["status"] == "insufficient")
@@ -1496,6 +1476,7 @@ else:
                     & scope_trends["trend_7d"].isna()
                 )
             ]
+
             if not rank7d.empty:
                 rank7d_display = rank7d.rename(columns={"last_val": "followers"})
                 render_bubble_table(
@@ -1506,10 +1487,12 @@ else:
                         ("d7str", L["trend_7d_col"]),
                         ("daily7dstr", L["daily_avg_col"]),
                     ],
+                    unified_n_cards=max_cards,
                     L=L,
                 )
             else:
                 st.info(L["no_trend_data"])
+
             if not stag7d.empty:
                 st.caption(
                     f"⚠️ {L['stagnant_list']} ({len(stag7d)}): "
@@ -1518,14 +1501,10 @@ else:
             if not insuf7d.empty:
                 st.caption(f"— {L['insuf_list']}: {len(insuf7d)}")
 
-        # MTD column.
+        # MTD column
         with colmtd:
             st.markdown(f"**{L['tab_mtd']}**")
-            rankmtd = (
-                scope_trends[scope_trends["trend_mtd"].notna()]
-                .sort_values("trend_mtd", ascending=False)
-                .reset_index(drop=True)
-            )
+
             stagmtd = scope_trends[scope_trends["status"] == "stagnant"]
             insufmtd = scope_trends[
                 (scope_trends["status"] == "insufficient")
@@ -1534,6 +1513,7 @@ else:
                     & scope_trends["trend_mtd"].isna()
                 )
             ]
+
             if not rankmtd.empty:
                 rankmtd_display = rankmtd.rename(columns={"last_val": "followers"})
                 render_bubble_table(
@@ -1544,10 +1524,12 @@ else:
                         ("mtdstr", L["trend_mtd_col"]),
                         ("dailymtdstr", L["daily_avg_col"]),
                     ],
+                    unified_n_cards=max_cards,
                     L=L,
                 )
             else:
                 st.info(L["no_trend_data"])
+
             if not stagmtd.empty:
                 st.caption(
                     f"⚠️ {L['stagnant_list']} ({len(stagmtd)}): "
@@ -1556,25 +1538,25 @@ else:
             if not insufmtd.empty:
                 st.caption(f"— {L['insuf_list']}: {len(insufmtd)}")
 
-        # 7D absolute growth column.
+        # ABS column
         with colabs:
             st.markdown(f"**{L['tab_abs']}**")
-            rankabs = (
-                scope_trends[scope_trends["growth_7d_abs"].notna()]
-                .sort_values("growth_7d_abs", ascending=False)
-                .reset_index(drop=True)
-            )
+
             if not rankabs.empty:
                 fc_lbl = L.get("forecast_label", "forecast")
-                rankabs["absstr"] = rankabs.apply(lambda r: _abs_fmt(r, fc_lbl), axis=1)
+                rankabs["absstr"] = rankabs.apply(
+                    lambda r: _abs_fmt(r, fc_lbl), axis=1
+                )
                 rankabs_display = rankabs.rename(columns={"last_val": "followers"})
+
                 render_bubble_table(
                     rankabs_display,
                     card_profiles,
                     followers_col="followers",
                     extra_badges=[("absstr", L["growth_7d_abs_col"])],
-                    L=L,
+                    unified_n_cards=max_cards,
                     card_height_px=64,
+                    L=L,
                 )
             else:
                 st.info("None")
