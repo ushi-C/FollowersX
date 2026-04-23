@@ -1462,7 +1462,9 @@ else:
         scope_trends = trends_df.copy()
 
     valid_users = set(filtered_df["username"].tolist())
-    scope_trends = scope_trends[scope_trends["username"].isin(valid_users)].copy()
+    scope_trends = scope_trends[
+        scope_trends["username"].isin(valid_users)
+    ].copy()
 
     if scope_trends.empty:
         st.info(L["no_trend_data"])
@@ -1488,7 +1490,7 @@ else:
             arrow = "🔺" if v >= 0 else "🔻"
             return f'<span class="bubble-badge badge-positive">{forecast_lbl} {arrow} {abs(v):,}</span>'
 
-        # ===== precompute rankings (for unified height) =====
+        # ===== rankings =====
         rank7d = (
             scope_trends[scope_trends["trend_7d"].notna()]
             .sort_values("trend_7d", ascending=False)
@@ -1507,13 +1509,24 @@ else:
             .reset_index(drop=True)
         )
 
-        # ✅ unified height baseline
-        max_cards = max(len(rank7d), len(rankmtd), len(rankabs))
+        # ===== ✅ 统一高度核心 =====
+        max_cards = max(len(rank7d), len(rankmtd), len(rankabs), 1)
+
+        CARD_H = 58
+        GAP = 6
+        PADDING = 16
+        MAX_SHOW = 10
+
+        natural_h = max_cards * CARD_H + max(max_cards - 1, 0) * GAP + PADDING
+        max_h = MAX_SHOW * CARD_H + (MAX_SHOW - 1) * GAP + PADDING
+
+        GLOBAL_IFRAME_H = min(natural_h, max_h)
+        GLOBAL_IFRAME_H = max(80, min(GLOBAL_IFRAME_H, 700))
 
         # ===== layout =====
         col7d, colmtd, colabs = st.columns(3)
 
-        # 7D column
+        # 7D
         with col7d:
             st.markdown(f"**{L['tab_7d']}**")
 
@@ -1536,7 +1549,7 @@ else:
                         ("d7str", L["trend_7d_col"]),
                         ("daily7dstr", L["daily_avg_col"]),
                     ],
-                    unified_n_cards=max_cards,
+                    fixed_iframe_height=GLOBAL_IFRAME_H,  # ✅ 核心
                     L=L,
                 )
             else:
@@ -1550,7 +1563,7 @@ else:
             if not insuf7d.empty:
                 st.caption(f"— {L['insuf_list']}: {len(insuf7d)}")
 
-        # MTD column
+        # MTD
         with colmtd:
             st.markdown(f"**{L['tab_mtd']}**")
 
@@ -1573,7 +1586,7 @@ else:
                         ("mtdstr", L["trend_mtd_col"]),
                         ("dailymtdstr", L["daily_avg_col"]),
                     ],
-                    unified_n_cards=max_cards,
+                    fixed_iframe_height=GLOBAL_IFRAME_H,  # ✅
                     L=L,
                 )
             else:
@@ -1587,7 +1600,7 @@ else:
             if not insufmtd.empty:
                 st.caption(f"— {L['insuf_list']}: {len(insufmtd)}")
 
-        # ABS column
+        # ABS
         with colabs:
             st.markdown(f"**{L['tab_abs']}**")
 
@@ -1596,6 +1609,7 @@ else:
                 rankabs["absstr"] = rankabs.apply(
                     lambda r: _abs_fmt(r, fc_lbl), axis=1
                 )
+
                 rankabs_display = rankabs.rename(columns={"last_val": "followers"})
 
                 render_bubble_table(
@@ -1603,8 +1617,8 @@ else:
                     card_profiles,
                     followers_col="followers",
                     extra_badges=[("absstr", L["growth_7d_abs_col"])],
-                    unified_n_cards=max_cards,
                     card_height_px=64,
+                    fixed_iframe_height=GLOBAL_IFRAME_H,  # ✅
                     L=L,
                 )
             else:
