@@ -742,7 +742,7 @@ body {
 
 @keyframes cardFadeIn {
     from { opacity: 0; }
-    to   { opacity: 1; }
+    to { opacity: 1; }
 }
 
 .bubble-table-wrapper {
@@ -767,15 +767,7 @@ body {
     animation: cardFadeIn 0.32s ease both;
     position: relative;
     overflow: hidden;
-    /* ── overlap fix ──────────────────────────────────────────────────────
-       will-change:opacity  → compositor promotes each card to its own layer,
-                              so the translateY in cardFadeIn never bleeds into
-                              a neighbour's paint rect.
-       flex-shrink:0        → prevents the flex engine from squashing cards
-                              when many are rendered simultaneously.
-       min-height:52px      → guarantees a stable floor height even if inner
-                              content hasn't fully painted yet.
-    ──────────────────────────────────────────────────────────────────── */
+
     will-change: opacity;
     flex-shrink: 0;
     min-height: 52px;
@@ -799,13 +791,10 @@ body {
 }
 
 .bubble-card:hover {
-    /* No translateY — vertical shift in a packed list causes neighbours to
-       visually overlap.  Use box-shadow + opacity lift instead. */
     box-shadow: 0 4px 22px rgba(212,175,55,0.28), inset 0 1px 0 rgba(255,255,255,0.7);
     opacity: 0.92;
 }
 
-/* Rank badge — top-left corner */
 .bubble-rank {
     position: absolute;
     top: 7px;
@@ -817,21 +806,31 @@ body {
     letter-spacing: 0.3px;
 }
 
-/* Top-3 accents */
-.rank-1 { border-color: rgba(212,175,55,0.6) !important; box-shadow: 0 0 0 1px rgba(212,175,55,0.3), 0 4px 18px rgba(212,175,55,0.15) !important; }
-.rank-2 { border-color: rgba(192,192,192,0.55) !important; box-shadow: 0 0 0 1px rgba(192,192,192,0.28), 0 3px 14px rgba(192,192,192,0.12) !important; }
-.rank-3 { border-color: rgba(205,127,50,0.5) !important; box-shadow: 0 0 0 1px rgba(205,127,50,0.25), 0 3px 12px rgba(205,127,50,0.1) !important; }
+.rank-1 {
+    border-color: rgba(212,175,55,0.6) !important;
+    box-shadow: 0 0 0 1px rgba(212,175,55,0.3), 0 4px 18px rgba(212,175,55,0.15) !important;
+}
+.rank-2 {
+    border-color: rgba(192,192,192,0.55) !important;
+    box-shadow: 0 0 0 1px rgba(192,192,192,0.28), 0 3px 14px rgba(192,192,192,0.12) !important;
+}
+.rank-3 {
+    border-color: rgba(205,127,50,0.5) !important;
+    box-shadow: 0 0 0 1px rgba(205,127,50,0.25), 0 3px 12px rgba(205,127,50,0.1) !important;
+}
+
 .rank-1 .bubble-rank { opacity: 1; }
 .rank-2 .bubble-rank { opacity: 0.85; }
 .rank-3 .bubble-rank { opacity: 0.75; }
 
-/* ── Avatar ── */
+/* Avatar */
 .bubble-avatar-col {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
+
 .bubble-avatar {
     width: 36px;
     height: 36px;
@@ -841,6 +840,7 @@ body {
     display: block;
     background: rgba(212,175,55,0.08);
 }
+
 .bubble-avatar-placeholder {
     width: 36px;
     height: 36px;
@@ -855,13 +855,14 @@ body {
     flex-shrink: 0;
 }
 
-/* ── Identity ── */
+/* Identity */
 .bubble-identity-col {
     display: flex;
     flex-direction: column;
     gap: 3px;
     min-width: 0;
 }
+
 .bubble-name-row {
     display: flex;
     align-items: center;
@@ -869,6 +870,7 @@ body {
     min-width: 0;
     overflow: hidden;
 }
+
 .bubble-jp-name {
     font-size: 12px;
     font-weight: 700;
@@ -880,6 +882,7 @@ body {
     flex-shrink: 1;
     min-width: 0;
 }
+
 .bubble-yt-icon {
     display: inline-flex;
     align-items: center;
@@ -888,7 +891,9 @@ body {
     transition: opacity 0.15s;
     line-height: 1;
 }
+
 .bubble-yt-icon:hover { opacity: 1; }
+
 .bubble-meta-row {
     display: flex;
     align-items: center;
@@ -896,6 +901,7 @@ body {
     flex-wrap: nowrap;
     overflow: hidden;
 }
+
 .bubble-username {
     font-size: 10px;
     opacity: 0.45;
@@ -905,11 +911,13 @@ body {
     flex-shrink: 1;
     min-width: 0;
 }
+
 .bubble-office-dot {
     font-size: 10px;
     opacity: 0.3;
     flex-shrink: 0;
 }
+
 .bubble-office-tag {
     font-size: 10px;
     opacity: 0.5;
@@ -921,7 +929,7 @@ body {
     min-width: 0;
 }
 
-/* ── Stats ── */
+/* Stats */
 .bubble-stats-col {
     display: flex;
     flex-direction: column;
@@ -929,10 +937,10 @@ body {
     gap: 3px;
     flex-shrink: 0;
     min-width: 80px;
-    /* Hard cap prevents a long absstr badge from crushing the identity col */
     max-width: 140px;
     overflow: hidden;
 }
+
 .bubble-followers {
     font-size: 13px;
     font-weight: 900;
@@ -944,16 +952,17 @@ body {
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
+
 .bubble-metrics-row {
     display: flex;
     gap: 4px;
     align-items: center;
-    /* nowrap: wrapping inflates card height unpredictably → iframe clip bug */
     flex-wrap: nowrap;
     justify-content: flex-end;
     overflow: hidden;
     max-width: 100%;
 }
+
 .bubble-badge {
     font-size: 9px;
     font-weight: 600;
@@ -964,25 +973,56 @@ body {
     line-height: 1.5;
     font-variant-numeric: tabular-nums;
 }
-.badge-positive  { color: #15803d; background: rgba(21,128,61,0.1);   border-color: rgba(21,128,61,0.22); }
-.badge-negative  { color: #dc2626; background: rgba(220,38,38,0.1);   border-color: rgba(220,38,38,0.22); }
-.badge-neutral   { color: #6b7280; background: rgba(107,114,128,0.1); border-color: rgba(107,114,128,0.18); }
-.badge-stagnant  { color: #d97706; background: rgba(217,119,6,0.1);   border-color: rgba(217,119,6,0.22); }
+
+.badge-positive {
+    color: #15803d;
+    background: rgba(21,128,61,0.1);
+    border-color: rgba(21,128,61,0.22);
+}
+.badge-negative {
+    color: #dc2626;
+    background: rgba(220,38,38,0.1);
+    border-color: rgba(220,38,38,0.22);
+}
+.badge-neutral {
+    color: #6b7280;
+    background: rgba(107,114,128,0.1);
+    border-color: rgba(107,114,128,0.18);
+}
+.badge-stagnant {
+    color: #d97706;
+    background: rgba(217,119,6,0.1);
+    border-color: rgba(217,119,6,0.22);
+}
 
 @media (prefers-color-scheme: dark) {
-    .badge-positive { color: #4ade80; background: rgba(74,222,128,0.1);  border-color: rgba(74,222,128,0.2); }
-    .badge-negative { color: #f87171; background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.2); }
-    .badge-neutral  { color: #9ca3af; background: rgba(156,163,175,0.1); border-color: rgba(156,163,175,0.18); }
-    .badge-stagnant { color: #fbbf24; background: rgba(251,191,36,0.1);  border-color: rgba(251,191,36,0.2); }
+    .badge-positive {
+        color: #4ade80;
+        background: rgba(74,222,128,0.1);
+        border-color: rgba(74,222,128,0.2);
+    }
+    .badge-negative {
+        color: #f87171;
+        background: rgba(248,113,113,0.1);
+        border-color: rgba(248,113,113,0.2);
+    }
+    .badge-neutral {
+        color: #9ca3af;
+        background: rgba(156,163,175,0.1);
+        border-color: rgba(156,163,175,0.18);
+    }
+    .badge-stagnant {
+        color: #fbbf24;
+        background: rgba(251,191,36,0.1);
+        border-color: rgba(251,191,36,0.2);
+    }
     .bubble-jp-name { color: #f0f0f8; }
 }
 </style>
 """
 
-
 def _badge_html(text: str, badge_type: str = "neutral") -> str:
     return f'<span class="bubble-badge badge-{badge_type}">{text}</span>'
-
 
 def _classify_badge(value_str: str) -> str:
     if value_str in ("—", ""):
@@ -995,7 +1035,6 @@ def _classify_badge(value_str: str) -> str:
         return "negative"
     return "neutral"
 
-
 def fmt_followers(n):
     if n is None:
         return "—"
@@ -1005,7 +1044,6 @@ def fmt_followers(n):
         return f"{n/1_000:.1f}K"
     return f"{n:,}"
 
-
 def render_bubble_table(
     df: pd.DataFrame,
     profiles: pd.DataFrame,
@@ -1014,7 +1052,7 @@ def render_bubble_table(
     max_rows: int = 50,
     L: dict = None,
     card_height_px: int = 58,
-    unified_n_cards: int = None,  # ✅ NEW
+    fixed_iframe_height: int = None,
 ):
     if L is None:
         L = {}
@@ -1039,12 +1077,11 @@ def render_bubble_table(
 
         rank_class = f"rank-{rank}" if rank <= 3 else ""
 
-
         # Avatar
         if avatar_url and str(avatar_url).startswith("http"):
             av = str(avatar_url).strip()
             avatar_html = (
-                f'<img class="bubble-avatar" src="{av}" loading="lazy" '
+                f'<img class="bubble-avatar" src="{av}" alt="" loading="lazy" '
                 f'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">'
                 f'<div class="bubble-avatar-placeholder" style="display:none;">◉</div>'
             )
@@ -1059,83 +1096,78 @@ def render_bubble_table(
         )
         name_display = name_raw.replace("<", "&lt;").replace(">", "&gt;")
 
-        # YouTube
-        if youtube_url and str(youtube_url).startswith("http"):
-            yt_html = f'<a class="bubble-yt-icon" href="{youtube_url}" target="_blank">▶</a>'
+        # YouTube icon
+        if youtube_url and str(youtube_url).strip().startswith("http"):
+            yt_url = str(youtube_url).strip()
+            yt_html = (
+                f'<a class="bubble-yt-icon" href="{yt_url}" target="_blank" rel="noopener">'
+                f'<svg viewBox="0 0 24 24" width="13" height="13" fill="#cc0000">'
+                f'<path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2A31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8z"/>'
+                f'<polygon points="9.75,15.02 15.5,12 9.75,8.98" fill="white"/>'
+                f"</svg></a>"
+            )
         else:
             yt_html = ""
 
         uname_display = username if username.startswith("@") else f"@{username}"
         office_display = str(office).replace("<", "&lt;") if office else ""
-
         fol_str = fmt_followers(int(followers)) if followers is not None else "—"
 
-
-        # Extra badges
         badges_html = ""
-        for col_name, _ in extra_badges:
-            val_str = row.get(col_name, "—")
-            if val_str is None:
+        for col_name, _label in extra_badges:
+            val_str = row[col_name] if col_name in merged.columns else "—"
+
+            if val_str is None or (isinstance(val_str, float) and val_str != val_str):
                 val_str = "—"
 
             if col_name == "absstr":
-                badges_html += str(val_str)
+                val_s = str(val_str)
+                if val_s == "—":
+                    badges_html += _badge_html("—", "neutral")
+                else:
+                    badges_html += val_s
             else:
                 btype = _classify_badge(str(val_str))
-                badges_html += _badge_html(str(val_str), btype)
+                badges_html += _badge_html(str(val_str).replace("<", "&lt;"), btype)
 
         rank_labels = {1: "🥇", 2: "🥈", 3: "🥉"}
         rank_display = rank_labels.get(rank, "")
-        # Cap delay at 0.5 s so cards deep in the list don't sit invisible
-        # for a distracting amount of time when many rows are rendered.
+
         delay = f"{min(i * 0.025, 0.5):.3f}s"
 
-        # office separator dot
         office_sep = (
             f'<span class="bubble-office-dot">·</span>'
             f'<span class="bubble-office-tag">{office_display}</span>'
-            if office_display
-            else ""
+            if office_display else ""
         )
 
-        cards_html.append(
-            f"""
-<div class="bubble-card {rank_class}" style="animation-delay:{delay}">
-  <div class="bubble-avatar-col">{avatar_html}</div>
-  <div class="bubble-identity-col">
-    <div class="bubble-name-row">{name_display}{yt_html}</div>
-    <div class="bubble-meta-row">{uname_display} · {office_display}</div>
-  </div>
-  <div class="bubble-stats-col">
-    <div class="bubble-followers">{fol_str}</div>
-    <div class="bubble-metrics-row">{badges_html}</div>
-  </div>
-</div>
-"""
-        )
+        cards_html.append(f"""
+        <div class="bubble-card {rank_class}" style="animation-delay:{delay}">
+            <span class="bubble-rank">{rank_display}</span>
+            <div class="bubble-avatar-col">{avatar_html}</div>
+            <div class="bubble-identity-col">
+                <div class="bubble-name-row">
+                    <span class="bubble-jp-name">{name_display}</span>{yt_html}
+                </div>
+                <div class="bubble-meta-row">
+                    <span class="bubble-username">{uname_display}</span>{office_sep}
+                </div>
+            </div>
+            <div class="bubble-stats-col">
+                <div class="bubble-followers">{fol_str}</div>
+                <div class="bubble-metrics-row">{badges_html}</div>
+            </div>
+        </div>
+        """)
 
-    # ── Dynamic iframe height ───────────────────────────────────────────────
-    # The iframe height now tracks actual content:
-    #   • When cards are few (≤ MAX_SHOW), iframe shrinks to fit exactly —
-    #     no blank space below the last card.
-    #   • When cards exceed MAX_SHOW, iframe is capped and inner div scrolls.
-    #   • MIN_IFRAME_H / MAX_IFRAME_H act as safety rails so the column never
-    #     collapses or balloons to an absurd size.
-    # ────────────────────────────────────────────────────────────────────────
-    CARD_H = card_height_px  # px — caller can override for wide-badge columns
-    GAP = 6                  # px — gap between cards (matches .bubble-table-wrapper gap)
-    PADDING = 16             # px — body top+bottom padding (8px each side)
-    MAX_SHOW = 10            # cards visible before scrolling kicks in
-    MIN_IFRAME_H = 80        # px — floor: never collapse to nothing
-    MAX_IFRAME_H = 7020       # px — ceiling: prevent runaway tall columns
+    CARD_H = card_height_px
+    GAP = 6
+    PADDING = 16
+    MAX_SHOW = 10
+    MIN_IFRAME_H = 80
+    MAX_IFRAME_H = 700
 
     n_cards = min(len(cards_html), max_rows)
-
-    # Natural height if every card fits without scrolling
-    if unified_n_cards is not None:
-        n_cards = max(real_n, unified_n_cards)
-    else:
-        n_cards = real_n
 
     natural_h = n_cards * CARD_H + max(n_cards - 1, 0) * GAP + PADDING
     max_h = MAX_SHOW * CARD_H + (MAX_SHOW - 1) * GAP + PADDING
@@ -1147,6 +1179,8 @@ def render_bubble_table(
         f"max-height:{max_h}px;"
         "overflow-y:auto;"
         "overflow-x:hidden;"
+        "scrollbar-width:thin;"
+        "scrollbar-color:rgba(212,175,55,0.45) transparent;"
     )
 
     inner_div = (
@@ -1155,7 +1189,21 @@ def render_bubble_table(
         + "</div>"
     )
 
-    full_html = BUBBLE_CSS + inner_div
+    scrollbar_css = """
+    <style>
+    .bubble-table-wrapper::-webkit-scrollbar { width: 5px; }
+    .bubble-table-wrapper::-webkit-scrollbar-track { background: transparent; }
+    .bubble-table-wrapper::-webkit-scrollbar-thumb {
+        background: rgba(212,175,55,0.4);
+        border-radius: 999px;
+    }
+    .bubble-table-wrapper::-webkit-scrollbar-thumb:hover {
+        background: rgba(212,175,55,0.7);
+    }
+    </style>
+    """
+
+    full_html = BUBBLE_CSS + scrollbar_css + inner_div
     components.html(full_html, height=iframe_h, scrolling=False)
 
 
