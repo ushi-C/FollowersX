@@ -1014,10 +1014,16 @@ def render_bubble_table(
     max_rows: int = 50,
     L: dict = None,
     card_height_px: int = 58,
-    fixed_iframe_height: int = 640,
+    fixed_iframe_height: int = None,  # Deprecated: kept for backward compat, ignored
 ):
     """
     Render a Bubble Table via components.html() so HTML is never sanitized by Streamlit.
+
+    iframe height is now computed dynamically:
+      - Shows all cards without scroll when count is small (≤ MAX_SHOW)
+      - Caps at MAX_SHOW cards' worth of height and enables scroll when count is large
+      - A minimum floor (MIN_IFRAME_H) and maximum ceiling (MAX_IFRAME_H) are enforced
+        so the column never collapses to nothing or grows excessively long.
     """
     if L is None:
         L = {}
@@ -1127,26 +1133,34 @@ def render_bubble_table(
 </div>"""
         )
 
-    # ── Scrollable wrapper injected INSIDE the iframe ──────────────────────
-    # Because components.html() renders in an isolated iframe, outer-page CSS
-    # cannot control internal layout.  We fix this by:
-    #   1. Capping the iframe at a comfortable fixed height (IFRAME_H).
-    #   2. Wrapping all cards in an inner <div> with overflow-y: auto so the
-    #      user gets a per-column scrollbar that always shows every card,
-    #      regardless of how many rows the current data-range filter produces.
+    # ── Dynamic iframe height ───────────────────────────────────────────────
+    # The iframe height now tracks actual content:
+    #   • When cards are few (≤ MAX_SHOW), iframe shrinks to fit exactly —
+    #     no blank space below the last card.
+    #   • When cards exceed MAX_SHOW, iframe is capped and inner div scrolls.
+    #   • MIN_IFRAME_H / MAX_IFRAME_H act as safety rails so the column never
+    #     collapses or balloons to an absurd size.
     # ────────────────────────────────────────────────────────────────────────
     CARD_H = card_height_px  # px — caller can override for wide-badge columns
-    GAP = 6  # px — gap between cards (matches .bubble-table-wrapper gap)
-    PADDING = 8  # px — body top+bottom padding
-    MAX_SHOW = 10  # cards visible before scrolling kicks in
+    GAP = 6                  # px — gap between cards (matches .bubble-table-wrapper gap)
+    PADDING = 16             # px — body top+bottom padding (8px each side)
+    MAX_SHOW = 10            # cards visible before scrolling kicks in
+    MIN_IFRAME_H = 80        # px — floor: never collapse to nothing
+    MAX_IFRAME_H = 700       # px — ceiling: prevent runaway tall columns
 
     n_cards = min(len(cards_html), max_rows)
+
     # Natural height if every card fits without scrolling
-    natural_h = n_cards * CARD_H + (n_cards - 1) * GAP + PADDING
-    # Cap: show at most MAX_SHOW cards before the column scrolls
+    natural_h = n_cards * CARD_H + max(n_cards - 1, 0) * GAP + PADDING
+
+    # Scrollable cap height: show at most MAX_SHOW cards before inner div scrolls
     max_h = MAX_SHOW * CARD_H + (MAX_SHOW - 1) * GAP + PADDING
-    # iframe height: whichever is smaller (no wasted blank space)
-    iframe_h = fixed_iframe_height
+
+    # Inner div uses max-height + overflow so it scrolls when needed
+    # iframe itself matches the rendered height — no extra blank space
+    inner_iframe_h = min(natural_h, max_h)
+    # Apply safety rails
+    iframe_h = max(MIN_IFRAME_H, min(inner_iframe_h, MAX_IFRAME_H))
 
     scroll_style = (
         f"max-height:{max_h}px;"
